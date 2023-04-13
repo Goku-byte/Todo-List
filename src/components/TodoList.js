@@ -11,6 +11,8 @@ const TodoListTable = () => {
   const [newDeadline, setNewDeadline] = useState("");
   const [newStatus, setNewStatus] = useState("Incomplete");
   const [editingKey, setEditingKey] = useState("");
+  const [searchText, setSearchText] = useState("");
+   const [sortOrder, setSortOrder] = useState(null);
 
   useEffect(() => {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -76,6 +78,9 @@ const TodoListTable = () => {
       dataIndex: "task",
       key: "task",
       editable: true,
+      sorter: (a, b) => {
+        return a.task.toLowerCase().localeCompare(b.task.toLowerCase());
+      },
     },
     {
       title: "Priority",
@@ -133,6 +138,7 @@ const TodoListTable = () => {
             </a>
             <Popconfirm title="Sure to cancel?" onConfirm={handleCancelRow}>
               <a href="#!" style={{ marginLeft: 8 }}>
+                {" "}
                 Cancel
               </a>
             </Popconfirm>
@@ -186,11 +192,36 @@ const TodoListTable = () => {
       }),
     };
   });
+
+
+
+const sortTasksInAscending = () => {
+  const sortedTasks = [...dataSource].sort((a, b) =>
+    a.task.localeCompare(b.task)
+  );
+  setDataSource(sortedTasks);
+};
+
+const sortTasksInDescending=()=>{
+  const sortedTasks = [...dataSource].sort((a, b) =>
+    b.task.localeCompare(a.task)
+  );
+  setDataSource(sortedTasks);
+}
+
   return (
     <div>
+      <Input
+        placeholder="Search"
+        onChange={(e) => setSearchText(e.target.value)}
+      />
+      <Button onClick={sortTasksInAscending}>Sort by Task in Ascending Order</Button>
+      <Button onClick={sortTasksInDescending}>Sort by Task in Descending Order</Button>
       <Table
         rowClassName={() => "editable-row"}
-        dataSource={dataSource}
+        dataSource={dataSource.filter((item) =>
+          item.task.toLowerCase().includes(searchText.toLowerCase())
+        )}
         columns={mergedColumns}
         pagination={{ pageSize: 5 }}
       />
